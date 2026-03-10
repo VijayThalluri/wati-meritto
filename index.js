@@ -5,26 +5,24 @@ const app = express();
 app.use(express.json());
 
 app.post("/wati-webhook", async (req, res) => {
-
   try {
 
-    console.log("Webhook received:", req.body);
+    console.log("Data received from WATI:", req.body);
 
-    const contact = req.body.payload?.contacts?.[0];
+    const name = req.body.name;
+    const mobile = req.body.mobile;
+    const source = req.body.source || "WhatsApp";
+    const campaign = req.body.campaign || "Admissions";
 
-    if (!contact) {
-      return res.status(200).send("No contact data");
+    if (!mobile) {
+      return res.status(400).send("Mobile number missing");
     }
-
-    const name = contact.profile?.name || "WhatsApp User";
-    const mobile = contact.wa_id;
 
     const payload = {
       name: name,
       mobile: mobile,
-      source: "WhatsApp",
-      medium: "WATI",
-      campaign: "Admissions"
+      source: source,
+      campaign: campaign
     };
 
     const response = await axios.post(
@@ -44,12 +42,10 @@ app.post("/wati-webhook", async (req, res) => {
 
   } catch (error) {
 
-    console.error("Error sending to Meritto:", error.response?.data || error.message);
-
-    res.status(500).send("Error");
+    console.error("Meritto Error:", error.response?.data || error.message);
+    res.status(500).send("Error sending lead");
 
   }
-
 });
 
 app.get("/", (req, res) => {
