@@ -5,39 +5,57 @@ const app = express();
 app.use(express.json());
 
 app.post("/wati-webhook", async (req, res) => {
+
   try {
+
+    console.log("Webhook received:", req.body);
+
     const contact = req.body.payload?.contacts?.[0];
-    if (!contact) return res.status(200).send("No contact");
 
-    const phone = contact.wa_id;
+    if (!contact) {
+      return res.status(200).send("No contact data");
+    }
+
     const name = contact.profile?.name || "WhatsApp User";
+    const mobile = contact.wa_id;
 
-    await axios.post(
+    const payload = {
+      name: name,
+      mobile: mobile,
+      source: "WhatsApp",
+      medium: "WATI",
+      campaign: "Admissions"
+    };
+
+    const response = await axios.post(
       "https://api.meritto.com/api/leads/create",
-      {
-        name: name,
-        mobile: phone,
-        source: "WhatsApp - WATI"
-      },
+      payload,
       {
         headers: {
-          Authorization: "Bearer d74d17270723509db98d2e268e80798a",
+          Authorization: "d74d17270723509db98d2e268e80798a",
           "Content-Type": "application/json"
         }
       }
     );
 
-    res.status(200).send("Lead created");
-  } catch (err) {
-    console.error(err.message);
+    console.log("Lead created in Meritto:", response.data);
+
+    res.status(200).send("Lead sent to Meritto");
+
+  } catch (error) {
+
+    console.error("Error sending to Meritto:", error.response?.data || error.message);
+
     res.status(500).send("Error");
+
   }
+
 });
 
 app.get("/", (req, res) => {
   res.send("WATI webhook is running");
 });
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Server running");
 });
