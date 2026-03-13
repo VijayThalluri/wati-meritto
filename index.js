@@ -30,7 +30,7 @@ app.post("/wati-webhook", async (req, res) => {
       payload,
       {
         headers: {
-          Authorization: "d74d17270723509db98d2e268e80798a",
+          Authorization: "Bearer d74d17270723509db98d2e268e80798a",
           "Content-Type": "application/json"
         }
       }
