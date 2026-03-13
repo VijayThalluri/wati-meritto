@@ -26,7 +26,7 @@ app.post("/wati-webhook", async (req, res) => {
     };
 
     const response = await axios.post(
-      "https://api.meritto.com/api/leads/create",
+      "https://api.meritto.com/api/leads/v1/create",
       payload,
       {
         headers: {
